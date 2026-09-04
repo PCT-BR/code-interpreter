@@ -192,9 +192,9 @@ function main() {
   const bridgeToken = b64urlSecret();
 
   const redisVars = {
-    REDIS_HOST: `\${{${args.redisService}.REDIS_HOST}}`,
-    REDIS_PORT: `\${{${args.redisService}.REDIS_PORT}}`,
-    REDIS_PASSWORD: `\${{${args.redisService}.REDIS_PASSWORD}}`,
+    REDIS_HOST: `\${{${args.redisService}.REDISHOST}}`,
+    REDIS_PORT: `\${{${args.redisService}.REDISPORT}}`,
+    REDIS_PASSWORD: `\${{${args.redisService}.REDISPASSWORD}}`,
   };
 
   setVars(args.minioService, {
