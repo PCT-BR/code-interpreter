@@ -4,20 +4,45 @@ This repository is a multi-service Code API stack. Railway's automatic
 Railpack detection is not enough because the root `package.json` has no app
 start script and the real entry points live in component Dockerfiles.
 
-The supported Railway shape is a control-plane deployment with a remote bridge:
+The simplest supported Railway shape is a compact control-plane deployment with
+a remote bridge:
 
 - `code-interpreter`: public/private Code API HTTP service
-- `codeapi-file-server`: file relay backed by MinIO
-- `codeapi-tool-call-server`: programmatic tool-call callback server
-- `codeapi-minio`: S3-compatible object storage for Code API files
 - `Redis`: Redis for queues, bridge pairing, leases, and replay state
+- `LC-Storage`: Railway bucket used as the S3-compatible object store
 - a separate VM/VPS running `@librechat/code` as the actual sandbox worker
 
 The sandbox worker should run outside Railway because the native sandbox modes
 need `/dev/kvm`, `unshare`, cgroups, and NsJail-related host support that
 Railway app containers should not be assumed to provide.
 
-## Prepare Railway
+## Compact Railway Deployment
+
+Point the single Code API service at Redis and the Railway bucket:
+
+```bash
+node scripts/railway-compact.mjs --apply --bucket LC-Storage
+```
+
+The compact service uses `Dockerfile.railway-control`, which runs the API,
+file-server, and tool-call-server in one container. It deliberately does not
+print bucket credentials.
+
+Redeploy only:
+
+```bash
+railway redeploy --service code-interpreter
+```
+
+After it is healthy, the older split services can be scaled to zero:
+
+```bash
+railway service scale --service codeapi-file-server eu-west=0
+railway service scale --service codeapi-tool-call-server eu-west=0
+railway service scale --service codeapi-minio eu-west=0
+```
+
+## Split Railway Deployment
 
 Run a dry-run first:
 
@@ -31,7 +56,7 @@ Apply the setup:
 node scripts/railway-ready.mjs --apply
 ```
 
-The script:
+The split setup script:
 
 - creates the missing Railway services;
 - creates a Redis database service;
@@ -65,6 +90,8 @@ endpoints:
           type: attached
           baseURL: http://code-interpreter.railway.internal:3112/v1
           default: true
+      allowedEnvironments:
+        - user
 ```
 
 ## VM/VPS Worker
