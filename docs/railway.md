@@ -10,7 +10,7 @@ The supported Railway shape is a control-plane deployment with a remote bridge:
 - `codeapi-file-server`: file relay backed by MinIO
 - `codeapi-tool-call-server`: programmatic tool-call callback server
 - `codeapi-minio`: S3-compatible object storage for Code API files
-- `codeapi-redis`: Redis for queues, bridge pairing, leases, and replay state
+- `Redis`: Redis for queues, bridge pairing, leases, and replay state
 - a separate VM/VPS running `@librechat/code` as the actual sandbox worker
 
 The sandbox worker should run outside Railway because the native sandbox modes

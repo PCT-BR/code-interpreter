@@ -14,7 +14,7 @@ const DEFAULTS = {
   fileService: 'codeapi-file-server',
   toolService: 'codeapi-tool-call-server',
   minioService: 'codeapi-minio',
-  redisService: 'codeapi-redis',
+  redisService: 'Redis',
   librechatService: 'LibreChat',
   workerId: 'pct-vm',
   baseUrl: 'http://code-interpreter.railway.internal:3112/v1',
@@ -31,6 +31,7 @@ Options:
   --branch <branch>       Branch to deploy
   --api-service <name>    Code API service name
   --worker-id <id>        Remote bridge worker ID
+  --redis-service <name>  Redis service name (default: Redis)
   --skip-services         Only set variables, do not create services
   --skip-librechat        Do not set LibreChat variables
   --help                  Show this help
@@ -63,6 +64,8 @@ function parseArgs(argv) {
       args.baseUrl = `http://${args.apiService}.railway.internal:3112/v1`;
     } else if (arg === '--worker-id') {
       args.workerId = argv[++i];
+    } else if (arg === '--redis-service') {
+      args.redisService = argv[++i];
     } else {
       throw new Error(`Unknown option: ${arg}`);
     }
