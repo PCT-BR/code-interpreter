@@ -217,6 +217,10 @@ async function run(runtimeSessionId?: string, args: string[] = []): Promise<void
   }
   const nsjailDockerMode =
     runtimeMode === 'docker-nsjail' || runtimeMode === 'docker-macos-nsjail';
+  const dockerAppArmorProfile =
+    runtimeMode === 'docker-nsjail'
+      ? process.env.LIBRECHAT_CODE_DOCKER_APPARMOR_PROFILE?.trim() || 'unconfined'
+      : undefined;
   const sandboxEndpoint =
     process.env.LIBRECHAT_CODE_SANDBOX_ENDPOINT ??
     'http://127.0.0.1:2000/api/v2';
@@ -447,7 +451,12 @@ async function run(runtimeSessionId?: string, args: string[] = []): Promise<void
                   nsjailLaunchProfile!;
                 return {
                   capabilities: MACOS_NSJAIL_CAPABILITIES,
-                  securityOptions: [`seccomp=${seccompProfile}`],
+                  securityOptions: [
+                    ...(dockerAppArmorProfile
+                      ? [`apparmor=${dockerAppArmorProfile}`]
+                      : []),
+                    `seccomp=${seccompProfile}`,
+                  ],
                   profileRevision,
                   restartStoppedContainers: false,
                   ...(fileRelayProfile ? { network: fileRelayProfile.network } : {}),
